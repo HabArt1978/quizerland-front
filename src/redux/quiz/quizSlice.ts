@@ -13,7 +13,7 @@ export const quizSlice = createSlice({
   initialState: quizState,
   reducers: {
     setupState: (state, action: PayloadAction<IQuizResponse>) => {
-      const questions = action.payload.questions.map<IQuestion>(
+      const questions = action.payload.quizItem.questions.map<IQuestion>(
         (question, idx) => {
           const questionItem: IQuestion = {
             id: idx,
@@ -29,11 +29,17 @@ export const quizSlice = createSlice({
         },
       )
 
-      state.id = action.payload._id
-      state.userId = action.payload.userId
-      state.title = action.payload.title
-      state.description = action.payload.description
+      state.currentQuestionIndex = action.payload.progress.currentQuestionIndex
+      state.rightAttempts = action.payload.progress.rightAttempts
+      state.isFinished = action.payload.progress.isFinished
+      state.progressId = action.payload.progress.id
+
+      state.id = action.payload.quizItem.id
+      state.userId = action.payload.quizItem.userId
+      state.title = action.payload.quizItem.title
+      state.description = action.payload.quizItem.description
       state.questions = questions
+      state.createdAt = action.payload.quizItem.createdAt
     },
 
     resetState: () => quizState,
@@ -46,29 +52,18 @@ export const quizSlice = createSlice({
       }
     },
 
-    resetCurrentQuestion: (state, action: PayloadAction<number>) => {
+    resetCurrentQuestion: state => {
       state.currentQuestionIndex = 0
       state.isFinished = false
-    },
-
-    goToAvailableQuiz: state => {
-      // const availableQuiz = state.quizzes.find(quiz => !quiz.isFinished)
-      // if (availableQuiz !== undefined) {
-      //   state.activeQuizId = availableQuiz.id
-      // }
+      state.rightAttempts = 0
     },
 
     setRightAttempts: state => {
       state.rightAttempts += 1
     },
 
-    resetRightAttempts: state => {
-      // const activeQuiz = state.quizzes.find(
-      //   quiz => quiz.id === state.activeQuizId,
-      // )
-      // if (activeQuiz !== undefined) {
-      //   activeQuiz.rightAttempts = 0
-      // }
+    setIsPreview: (state, action: PayloadAction<boolean>) => {
+      state.isPreview = action.payload
     },
   },
 })
@@ -78,8 +73,7 @@ export const {
   resetState,
   goToNextQuestion,
   resetCurrentQuestion,
-  goToAvailableQuiz,
   setRightAttempts,
-  resetRightAttempts,
+  setIsPreview,
 } = quizSlice.actions
 export default quizSlice.reducer
